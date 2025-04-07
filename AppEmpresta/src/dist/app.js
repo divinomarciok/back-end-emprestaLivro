@@ -20,7 +20,6 @@ dataSource_1.AppDataSource.initialize()
 app.use("/api", livroRoutes_1.default);
 app.use("/api", pessoaRoutes_1.default);
 app.use("/api", emprestimoRoutes_1.default);
-// Exemplo: POST /api/livros
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000");
 });

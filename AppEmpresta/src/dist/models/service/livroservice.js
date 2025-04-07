@@ -9,39 +9,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LivroService = void 0;
+exports.listarLivrosDisponiveis = exports.atualizaStatus = exports.listarTodosLivros = exports.cadastrarLivro = void 0;
 const dataSource_1 = require("../config/dataSource");
 const livro_1 = require("../livro");
-class LivroService {
-    constructor() {
-        this.livroRepository = dataSource_1.AppDataSource.getRepository(livro_1.Livro);
+const livroRepo = dataSource_1.AppDataSource.getRepository(livro_1.Livro);
+const cadastrarLivro = (dados) => __awaiter(void 0, void 0, void 0, function* () {
+    const { titulo, autor, categoria } = dados;
+    if (!titulo || !autor) {
+        throw new Error("Título e autor são obrigatórios");
     }
-    cadastrarLivro(dados) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Validação básica (opcional)
-            if (!dados.titulo || !dados.autor) {
-                throw new Error("Título e autor são obrigatórios");
-            }
-            const novoLivro = this.livroRepository.create(dados);
-            return yield this.livroRepository.save(novoLivro);
-        });
+    const livroExistente = yield livroRepo.findOne({ where: { titulo, autor } });
+    if (livroExistente) {
+        throw new Error("Livro já cadastrado");
     }
-    listarTodos() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.livroRepository.find();
-        });
+    const novoLivro = livroRepo.create(Object.assign(Object.assign({}, dados), { status: "disponivel" }));
+    return yield livroRepo.save(novoLivro);
+});
+exports.cadastrarLivro = cadastrarLivro;
+const listarTodosLivros = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield livroRepo.find();
+});
+exports.listarTodosLivros = listarTodosLivros;
+const atualizaStatus = (dados) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id, status } = dados;
+    if (!id || !status) {
+        throw new Error("ID e novo status são obrigatórios");
     }
-    listarTodosDisponiveis() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const livros = yield this.livroRepository.find({ where: { status: "disponivel" } });
-            console.log("Livros disponíveis encontrados:", livros);
-            return livros;
-        });
+    const livro = yield livroRepo.findOneBy({ id });
+    if (!livro) {
+        throw new Error("Livro não encontrado");
     }
-    buscarPorId(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.livroRepository.findOneBy({ id });
-        });
-    }
-}
-exports.LivroService = LivroService;
+    livro.status = status;
+    return yield livroRepo.save(livro);
+});
+exports.atualizaStatus = atualizaStatus;
+const listarLivrosDisponiveis = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield livroRepo.find({ where: { status: "disponivel" } });
+});
+exports.listarLivrosDisponiveis = listarLivrosDisponiveis;

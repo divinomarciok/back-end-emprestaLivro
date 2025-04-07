@@ -9,61 +9,71 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registrarDevolucao = exports.criarEmprestimo = void 0;
+exports.buscarEmprestimoPorId = exports.listarEmprestimosAtivos = exports.listarTodosEmprestimos = exports.registrarDevolucao = exports.criarEmprestimo = void 0;
 const dataSource_1 = require("../config/dataSource");
 const emprestimo_1 = require("../emprestimo");
 const pessoa_1 = require("../pessoa");
 const livro_1 = require("../livro");
-const criarEmprestimo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pessoaId, livroId } = req.body;
-    try {
-        const emprestimoRepo = dataSource_1.AppDataSource.getRepository(emprestimo_1.Emprestimo);
-        const pessoaRepo = dataSource_1.AppDataSource.getRepository(pessoa_1.Pessoa);
-        const livroRepo = dataSource_1.AppDataSource.getRepository(livro_1.Livro);
-        const pessoa = yield pessoaRepo.findOneBy({ id: pessoaId });
-        if (!pessoa)
-            return res.status(404).json({ mensagem: "Pessoa não encontrada" });
-        const livro = yield livroRepo.findOneBy({ id: livroId });
-        if (!livro)
-            return res.status(404).json({ mensagem: "Livro não encontrado" });
-        if (livro.status !== "disponivel") {
-            return res.status(400).json({ mensagem: "Livro indisponível para empréstimo" });
-        }
-        // Atualiza status para emprestado
-        livro.status = "emprestado";
-        yield livroRepo.save(livro);
-        const novoEmprestimo = emprestimoRepo.create({
-            livro,
-            pessoa,
-            data_emprestimo: new Date(),
-        });
-        const resultado = yield emprestimoRepo.save(novoEmprestimo);
-        return res.status(201).json(resultado);
+const typeorm_1 = require("typeorm");
+const emprestimoRepo = dataSource_1.AppDataSource.getRepository(emprestimo_1.Emprestimo);
+const pessoaRepo = dataSource_1.AppDataSource.getRepository(pessoa_1.Pessoa);
+const livroRepo = dataSource_1.AppDataSource.getRepository(livro_1.Livro);
+const criarEmprestimo = (dados) => __awaiter(void 0, void 0, void 0, function* () {
+    const { pessoaId, livroId } = dados;
+    const pessoa = yield pessoaRepo.findOneBy({ id: pessoaId });
+    if (!pessoa) {
+        throw new Error("Pessoa não encontrada");
     }
-    catch (erro) {
-        console.error("Erro ao criar empréstimo:", erro);
-        return res.status(500).json({ erro: "Erro interno ao criar empréstimo" });
+    const livro = yield livroRepo.findOneBy({ id: livroId });
+    if (!livro) {
+        throw new Error("Livro não encontrado");
     }
+    if (livro.status !== "disponivel") {
+        throw new Error("Livro indisponível para empréstimo");
+    }
+    // Atualiza status para emprestado
+    livro.status = "emprestado";
+    yield livroRepo.save(livro);
+    const novoEmprestimo = emprestimoRepo.create({
+        livro,
+        pessoa,
+        data_emprestimo: new Date()
+    });
+    return yield emprestimoRepo.save(novoEmprestimo);
 });
 exports.criarEmprestimo = criarEmprestimo;
-const registrarDevolucao = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const { data_devolucao } = req.body;
-    try {
-        const emprestimoRepo = dataSource_1.AppDataSource.getRepository(emprestimo_1.Emprestimo);
-        const emprestimo = yield emprestimoRepo.findOneBy({ id: parseInt(id) });
-        if (!emprestimo) {
-            return res.status(404).json({ mensagem: "Empréstimo não encontrado" });
-        }
-        // Atualiza a data_devolucao com a data atual
-        emprestimo.data_devolucao = data_devolucao;
-        yield emprestimoRepo.save(emprestimo);
-        return res.status(200).json({ mensagem: "Devolução registrada com sucesso", emprestimo });
-        0;
+const registrarDevolucao = (dados) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id, data_devolucao } = dados;
+    const emprestimo = yield emprestimoRepo.findOneBy({ id });
+    if (!emprestimo) {
+        throw new Error("Empréstimo não encontrado");
     }
-    catch (erro) {
-        console.error("Erro ao registrar devolução:", erro);
-        return res.status(500).json({ erro: "Erro interno ao registrar devolução" });
+    emprestimo.data_devolucao = data_devolucao || new Date();
+    const livro = yield livroRepo.findOneBy({ id: emprestimo.livro.id });
+    if (livro) {
+        livro.status = "disponivel";
+        yield livroRepo.save(livro);
     }
+    return yield emprestimoRepo.save(emprestimo);
 });
 exports.registrarDevolucao = registrarDevolucao;
+const listarTodosEmprestimos = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield emprestimoRepo.find({
+        relations: ["livro", "pessoa"]
+    });
+});
+exports.listarTodosEmprestimos = listarTodosEmprestimos;
+const listarEmprestimosAtivos = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield emprestimoRepo.find({
+        where: { data_devolucao: (0, typeorm_1.IsNull)() },
+        relations: ["livro", "pessoa"]
+    });
+});
+exports.listarEmprestimosAtivos = listarEmprestimosAtivos;
+const buscarEmprestimoPorId = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield emprestimoRepo.findOne({
+        where: { id },
+        relations: ["livro", "pessoa"]
+    });
+});
+exports.buscarEmprestimoPorId = buscarEmprestimoPorId;

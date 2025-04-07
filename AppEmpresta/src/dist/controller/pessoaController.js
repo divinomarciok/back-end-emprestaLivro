@@ -11,16 +11,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pessoaController = void 0;
 const pessoaService_1 = require("../models/service/pessoaService");
-const pessoaService = new pessoaService_1.PessoaService();
 exports.pessoaController = {
     criar: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const { nome, matricula, email } = req.body;
         try {
-            const pessoa = yield pessoaService.criarPessoa(nome, matricula, email);
-            yield res.status(201).json(pessoa);
+            const pessoa = yield (0, pessoaService_1.criarPessoa)(req.body);
+            res.status(201).json(pessoa);
         }
         catch (error) {
-            yield res.status(400).json({ erro: error.message });
+            res.status(400).json({ erro: error.message });
         }
     }),
+    listarTodos: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const pessoas = yield (0, pessoaService_1.listarTodasPessoas)();
+            res.status(200).json(pessoas);
+        }
+        catch (error) {
+            res.status(400).json({ erro: error.message });
+        }
+    }),
+    atualizar: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const id = parseInt(req.params.id);
+            const dadosAtualizacao = Object.assign(Object.assign({}, req.body), { id });
+            const pessoa = yield (0, pessoaService_1.atualizarPessoa)(dadosAtualizacao);
+            res.status(200).json(pessoa);
+        }
+        catch (error) {
+            res.status(400).json({ erro: error.message });
+        }
+    }),
+    remover: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const id = parseInt(req.params.id);
+            yield (0, pessoaService_1.removerPessoa)(id);
+            res.status(200).json({ mensagem: "Pessoa removida com sucesso" });
+        }
+        catch (error) {
+            res.status(400).json({ erro: error.message });
+        }
+    })
 };
