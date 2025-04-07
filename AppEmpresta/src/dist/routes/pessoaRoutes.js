@@ -4,4 +4,7 @@ const express_1 = require("express");
 const pessoaController_1 = require("../controller/pessoaController");
 const pessoaRouter = (0, express_1.Router)();
 pessoaRouter.post("/pessoas", pessoaController_1.pessoaController.criar);
+pessoaRouter.get("/pessoas", pessoaController_1.pessoaController.listarTodos);
+pessoaRouter.put("/pessoas/:id", pessoaController_1.pessoaController.atualizar);
+pessoaRouter.delete("/pessoas/:id", pessoaController_1.pessoaController.remover);
 exports.default = pessoaRouter;

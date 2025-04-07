@@ -1,0 +1,45 @@
+.home-header {
+  margin-bottom: 2rem;
+}
+
+.home-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.livro-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.livro-card .card-title {
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  padding: 1rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--danger-color);
+  border-radius: 0.375rem;
+  color: var(--danger-color);
+  margin-bottom: 1rem;
+}
+
+.no-books-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background-color: rgba(37, 99, 235, 0.05);
+  border-radius: 0.375rem;
+  color: var(--primary-color);
+} 

@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import livroRouter from "./routes/livroRoutes";
 import { AppDataSource } from "./models/config/dataSource";
 import pessoaRouter from "./routes/pessoaRoutes";
@@ -6,6 +7,7 @@ import emprestimoRoutes from "./routes/emprestimoRoutes";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 AppDataSource.initialize()
   .then(() => {

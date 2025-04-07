@@ -20,7 +20,7 @@ export const livroService = {
     return response.data;
   },
   
-  cadastrar: async (livro: { titulo: string; autor: string; isbn: string }) => {
+  cadastrar: async (livro: { titulo: string; autor: string; categoria: string }) => {
     const response = await api.post('/livros', livro);
     return response.data;
   },
@@ -33,7 +33,12 @@ export const livroService = {
 
 // API endpoints for people
 export const pessoaService = {
-  criar: async (pessoa: { nome: string; email: string }) => {
+  listarTodos: async () => {
+    const response = await api.get('/pessoas');
+    return response.data;
+  },
+  
+  criar: async (pessoa: { nome: string; matricula: string; email: string }) => {
     const response = await api.post('/pessoas', pessoa);
     return response.data;
   }
@@ -41,6 +46,11 @@ export const pessoaService = {
 
 // API endpoints for loans
 export const emprestimoService = {
+  listarAtivos: async () => {
+    const response = await api.get('/emprestimos');
+    return response.data;
+  },
+  
   criar: async (emprestimo: { livroId: number; pessoaId: number }) => {
     const response = await api.post('/emprestimo', emprestimo);
     return response.data;
