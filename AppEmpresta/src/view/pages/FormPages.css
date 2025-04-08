@@ -1,0 +1,28 @@
+.form-page {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-actions {
+  margin-top: 2rem;
+}
+
+.success-message {
+  padding: 1rem;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--success-color);
+  border-radius: 0.375rem;
+  color: var(--success-color);
+  margin-bottom: 1rem;
+}
+
+.form-page .page-title {
+  margin-bottom: 1.5rem;
+} 

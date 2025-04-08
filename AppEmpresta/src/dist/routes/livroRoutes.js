@@ -5,5 +5,6 @@ const livroController_1 = require("../controller/livroController");
 const livroRouter = (0, express_1.Router)();
 livroRouter.post("/livros", livroController_1.livroController.cadastrar);
 livroRouter.get("/livros", livroController_1.livroController.listarTodos);
-livroRouter.get("/livros/disponiveis", livroController_1.livroController.listarDisponiveis);
+livroRouter.get("/livros/disponiveis", livroController_1.livroController.listarLivrosDisponiveis);
+livroRouter.post("/livros/atualiza", livroController_1.livroController.atualizaStatus);
 exports.default = livroRouter;

@@ -8,25 +8,86 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PessoaService = void 0;
-// src/services/PessoaService.ts
+exports.removerPessoa = exports.atualizarPessoa = exports.buscarPessoaPorMatricula = exports.buscarPessoaPorId = exports.listarTodasPessoas = exports.criarPessoa = void 0;
 const dataSource_1 = require("../config/dataSource");
 const pessoa_1 = require("../pessoa");
-class PessoaService {
-    constructor() {
-        this.pessoaRepository = dataSource_1.AppDataSource.getRepository(pessoa_1.Pessoa);
+const pessoaRepo = dataSource_1.AppDataSource.getRepository(pessoa_1.Pessoa);
+const criarPessoa = (dados) => __awaiter(void 0, void 0, void 0, function* () {
+    const { nome, matricula, email } = dados;
+    if (!nome || !matricula || !email) {
+        throw new Error("Nome, matrícula e email são obrigatórios");
     }
-    criarPessoa(nome, matricula, email) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const novaPessoa = this.pessoaRepository.create({ nome, matricula, email });
-            return yield this.pessoaRepository.save(novaPessoa);
+    const pessoaExistente = yield pessoaRepo.findOne({ where: { matricula } });
+    if (pessoaExistente) {
+        throw new Error("Já existe uma pessoa cadastrada com esta matrícula");
+    }
+    const emailExistente = yield pessoaRepo.findOne({ where: { email } });
+    if (emailExistente) {
+        throw new Error("Este email já está em uso");
+    }
+    const novaPessoa = pessoaRepo.create(dados);
+    return yield pessoaRepo.save(novaPessoa);
+});
+exports.criarPessoa = criarPessoa;
+const listarTodasPessoas = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield pessoaRepo.find();
+});
+exports.listarTodasPessoas = listarTodasPessoas;
+const buscarPessoaPorId = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield pessoaRepo.findOneBy({ id });
+});
+exports.buscarPessoaPorId = buscarPessoaPorId;
+const buscarPessoaPorMatricula = (matricula) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield pessoaRepo.findOneBy({ matricula });
+});
+exports.buscarPessoaPorMatricula = buscarPessoaPorMatricula;
+const atualizarPessoa = (dados) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = dados, dadosAtualizacao = __rest(dados, ["id"]);
+    if (!id) {
+        throw new Error("ID é obrigatório para atualização");
+    }
+    const pessoa = yield pessoaRepo.findOneBy({ id });
+    if (!pessoa) {
+        throw new Error("Pessoa não encontrada");
+    }
+    if (dadosAtualizacao.matricula) {
+        const pessoaComMatricula = yield pessoaRepo.findOne({
+            where: { matricula: dadosAtualizacao.matricula },
         });
+        if (pessoaComMatricula && pessoaComMatricula.id !== id) {
+            throw new Error("Esta matrícula já está em uso por outra pessoa");
+        }
     }
-    listarPessoas() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.pessoaRepository.find();
+    if (dadosAtualizacao.email) {
+        const pessoaComEmail = yield pessoaRepo.findOne({
+            where: { email: dadosAtualizacao.email },
         });
+        if (pessoaComEmail && pessoaComEmail.id !== id) {
+            throw new Error("Este email já está em uso por outra pessoa");
+        }
     }
-}
-exports.PessoaService = PessoaService;
+    Object.assign(pessoa, dadosAtualizacao);
+    return yield pessoaRepo.save(pessoa);
+});
+exports.atualizarPessoa = atualizarPessoa;
+const removerPessoa = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const pessoa = yield pessoaRepo.findOneBy({ id });
+    if (!pessoa) {
+        throw new Error("Pessoa não encontrada");
+    }
+    yield pessoaRepo.remove(pessoa);
+    return true;
+});
+exports.removerPessoa = removerPessoa;
